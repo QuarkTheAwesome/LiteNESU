@@ -25,6 +25,7 @@ You could probably use something different if you want.
 * If you aren't a developer, this probably won't be good enough for you.
 * There's no sound.
 * There's only one player.
+* If you try and exit it'll crash.
 * It's slow. It's really, really slow. See the TODO about how I think this could be fixed.
 * I've only tested Yie-Ar Kung Fu (working!) and Super Mario Bros. I'm lazy, I know. Most other ROMs probably won't work.
 * There's some weird RAM corruption stuff going on which makes Super Mario really, really, realy bad. You'll see.
