@@ -13,14 +13,7 @@ void fillScreenQuick(char r,char g,char b,char a);
 void drawPixelQuick(int x, int y, char r, char g, char b, char a);
 int(*VPADRead)(int controller, VPADData *buffer, unsigned int num, int *error);
 
-//WiiU prototypes
-void(*DCFlushRange)(void *buffer, unsigned int length);
-unsigned int(*OSScreenFlipBuffersEx)(unsigned int bufferNum);
-unsigned int(*OSScreenGetBufferSizeEx)(unsigned int bufferNum);
-unsigned int(*OSScreenClearBufferEx)(unsigned int bufferNum, unsigned int temp);
-unsigned int (*OSScreenPutPixelEx)(unsigned int bufferNum, unsigned int posX, unsigned int posY, uint32_t color);
-
-
+//WiiU prototypes at bottom of file
 
 //libwiiu:types.h
 
@@ -575,5 +568,14 @@ typedef struct
     uint8_t unk_volume;          /* One less than volume */
     char unknowna4[0xac - 0xa4];
 } VPADData;
+
+//WiiU function prototypes
+
+void(*DCFlushRange)(void *buffer, unsigned int length);
+unsigned int(*OSScreenFlipBuffersEx)(unsigned int bufferNum);
+unsigned int(*OSScreenGetBufferSizeEx)(unsigned int bufferNum);
+unsigned int(*OSScreenClearBufferEx)(unsigned int bufferNum, unsigned int temp);
+unsigned int (*OSScreenPutPixelEx)(unsigned int bufferNum, unsigned int posX, unsigned int posY, uint32_t color);
+
 
 #endif /* LOADER_H */
