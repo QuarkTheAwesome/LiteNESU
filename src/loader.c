@@ -793,7 +793,8 @@ void fce_run()
 {
 	while(1)
 	{
-		//_printstr("loop");
+		startDebugger();
+		fillScreenQuick(0,0,0,0);
 		wait_for_frame();
 			int scanlines = 262;
 			while (scanlines-- > 0)
@@ -1658,5 +1659,75 @@ void drawPixelQuick(int x, int y, char r, char g, char b, char a)
 	uint32_t num = (r << 24) | (g << 16) | (b << 8) | a;
 	OSScreenPutPixelEx(0,x,y,num);
 	OSScreenPutPixelEx(1,x,y,num);
+}
+
+//Stuff the debugger uses. I know it's slow, but speed is not what this is about
+
+void drawString(int x, int line, char * string)
+{
+	unsigned int(*OSScreenPutFontEx)(unsigned int bufferNum, unsigned int posX, unsigned int line, void * buffer);
+	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenPutFontEx", &OSScreenPutFontEx);
+	OSScreenPutFontEx(0, x, line, string);
+	OSScreenPutFontEx(1, x, line, string);
+}
+
+void clearBothBuffers() {
+	int ii = 0;
+	for (ii, i < 2, i++) {
+		fillScreenQuick(0, 0, 0, 0);
+		flipBuffersQuick();
+	}
+}
+
+void _printstrNC(int line, char *str)
+{
+	int ii = 0;
+	for (ii; ii < 2; ii++)
+	{
+		drawString(0,line,str);
+		flipBuffersQuick();
+	}
+}
+
+//The debugger itself
+unsigned int debugger_frame = 1; //For whatever reason, addresses seem to start at 1 (or 0x01) on the WiiU?
+unsigned int debugger_offset = 0x01;
+void debugger_draw() {
+	//RAM draw
+
+	char print[128];
+	__os_snprintf(print, 255, "Now showing: CPU RAM at offset %X. System is up to frame %d", debugger_offset, debugger_frame);
+	_printstrNC(9, print);
+	__os_snprintf(print, 255, "%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X", cpu_ram_read(0x00 + debugger_offset), cpu_ram_read(0x01 + debugger_offset), cpu_ram_read(0x02 + debugger_offset), cpu_ram_read(0x03 + debugger_offset), cpu_ram_read(0x04 + debugger_offset), cpu_ram_read(0x05 + debugger_offset), cpu_ram_read(0x06 + debugger_offset), cpu_ram_read(0x07 + debugger_offset), cpu_ram_read(0x08 + debugger_offset), cpu_ram_read(0x09 + debugger_offset), cpu_ram_read(0x0A + debugger_offset), cpu_ram_read(0x0B + debugger_offset), cpu_ram_read(0x0C + debugger_offset), cpu_ram_read(0x0D + debugger_offset), cpu_ram_read(0x0E + debugger_offset), cpu_ram_read(0x0F + debugger_offset));
+	_printstrNC(11, print);
+}
+
+void startDebugger() {
+	debugger_draw();
+	while (1) {
+		VPADData vpad;
+		int error;
+		VPADRead(0, &vpad, 1, &error);
+		if (vpad.btn_trigger & BUTTON_ZR) {
+			break;
+		} else if (vpad.btn_hold & BUTTON_ZL) {
+			break;
+		} else if (vpad.btn_trigger & BUTTON_L) {
+			if (debugger_offset >= 0x10) {
+				debugger_offset = debugger_offset - 0x10;
+				fillScreenQuick(0, 0, 0, 0);
+				debugger_draw();
+				flipBuffersQuick();
+			}
+		} else if (vpad.btn_trigger & BUTTON_R) {
+			if (debugger_offset <= 0x7FF0) {
+				debugger_offset = debugger_offset + 0x10;
+				fillScreenQuick(0, 0, 0, 0);
+				debugger_draw();
+				flipBuffersQuick();
+			}
+		}
+	}
+	debugger_frame++;
 }
  

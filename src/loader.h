@@ -7,6 +7,7 @@ void _main();
 void _osscreeninit();
 static int curl_write_data_callback(void *buffer, int size, int nmemb, void *userp);
 void _mainThread(int argc, void *argv);
+void startDebugger();
 
 void flipBuffersQuick();
 void fillScreenQuick(char r,char g,char b,char a);
