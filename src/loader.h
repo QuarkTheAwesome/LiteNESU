@@ -11,7 +11,6 @@ void _mainThread(int argc, void *argv);
 void flipBuffersQuick();
 void fillScreenQuick(char r,char g,char b,char a);
 void drawPixelQuick(int x, int y, char r, char g, char b, char a);
-int(*VPADRead)(int controller, VPADData *buffer, unsigned int num, int *error);
 
 //WiiU prototypes at bottom of file
 
@@ -576,6 +575,6 @@ unsigned int(*OSScreenFlipBuffersEx)(unsigned int bufferNum);
 unsigned int(*OSScreenGetBufferSizeEx)(unsigned int bufferNum);
 unsigned int(*OSScreenClearBufferEx)(unsigned int bufferNum, unsigned int temp);
 unsigned int (*OSScreenPutPixelEx)(unsigned int bufferNum, unsigned int posX, unsigned int posY, uint32_t color);
-
+int(*VPADRead)(int controller, VPADData *buffer, unsigned int num, int *error);
 
 #endif /* LOADER_H */
