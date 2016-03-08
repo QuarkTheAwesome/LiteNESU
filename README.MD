@@ -1,4 +1,4 @@
-# LiteNESU
+# LiteNESU (with debugger, developers only!)
 ## A (terrible) NES emulator for 5.5.0/5.5.1 WiiUs.
 
 Based off [LiteNES](https://github.com/NJUOS/LiteNES). Lots of code taken from [libwiiu](https://github.com/wiiudev/libwiiu) and the [5.5.x ELF loader](https://gbatemp.net/threads/5-5-x-elf-loader.414650/).
