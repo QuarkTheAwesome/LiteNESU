@@ -1,6 +1,13 @@
 # LiteNESU (with debugger, developers only!)
 ## A (terrible) NES emulator for 5.5.0/5.5.1 WiiUs.
 
+### Debugger Usage
+Once a ROM is loaded, you'll immediately be presented with the first 0x10 (16) bytes of CPU RAM. Use L and R to change the offset (L = -0x10, R = +0x10) and ZR to advance the frame (do another 262 scanlines). You can hold ZL to continuosly advance the frame (but it's pretty slow!)
+
+As for the offsets, they are simply added to which byte we're getting (e.g. `ram[0x00 + offset]`, `ram[0x0E + offset]`) Please note that while the offset is displayed as 0x00 when you first start, it's actually hard-coded as 0x01. This seems to be a bug in the WiiU - when it's set to 0x00, it is displayed (and acts like) 0xFFFFFFFF.
+
+
+
 Based off [LiteNES](https://github.com/NJUOS/LiteNES). Lots of code taken from [libwiiu](https://github.com/wiiudev/libwiiu) and the [5.5.x ELF loader](https://gbatemp.net/threads/5-5-x-elf-loader.414650/).
 Thanks tons. I know I didn't ask you, but your code is still awesome.
 Everything that isn't mine is distributed under their respective licenses.
