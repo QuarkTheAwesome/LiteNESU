@@ -1673,7 +1673,7 @@ void drawString(int x, int line, char * string)
 
 void clearBothBuffers() {
 	int ii = 0;
-	for (ii, i < 2, i++) {
+	for (ii; ii < 2; ii++) {
 		fillScreenQuick(0, 0, 0, 0);
 		flipBuffersQuick();
 	}
@@ -1689,19 +1689,41 @@ void _printstrNC(int line, char *str)
 	}
 }
 
+// These defines didn't work, but it will help you decode the magic numbers I was forced to put in below
+//#define DEBUGGER_CPU_RAM 0x01
+//#define DEBUGGER_PPU_RAM 0x02
+//#define CPU_RAM_MIN_ADDR 0x10
+//#define CPU_RAM_MAX_ADDR 0x7FF0
+//#define PPU_RAM_MIN_ADDR 0x10
+//#define PPU_RAM_MAX_ADDR 0x3FF0
+
 //The debugger itself
 unsigned int debugger_frame = 1; //For whatever reason, addresses seem to start at 1 (or 0x01) on the WiiU?
 unsigned int debugger_offset = 0x01;
+int debugger_ram_to_show = 0x01;
 void debugger_draw() {
 	//RAM draw
 
 	char print[128];
-	__os_snprintf(print, 255, "Now showing: CPU RAM at offset %X. System is up to frame %d", debugger_offset, debugger_frame);
-	_printstrNC(9, print);
-	__os_snprintf(print, 255, "%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X", cpu_ram_read(0x00 + debugger_offset), cpu_ram_read(0x01 + debugger_offset), cpu_ram_read(0x02 + debugger_offset), cpu_ram_read(0x03 + debugger_offset), cpu_ram_read(0x04 + debugger_offset), cpu_ram_read(0x05 + debugger_offset), cpu_ram_read(0x06 + debugger_offset), cpu_ram_read(0x07 + debugger_offset), cpu_ram_read(0x08 + debugger_offset), cpu_ram_read(0x09 + debugger_offset), cpu_ram_read(0x0A + debugger_offset), cpu_ram_read(0x0B + debugger_offset), cpu_ram_read(0x0C + debugger_offset), cpu_ram_read(0x0D + debugger_offset), cpu_ram_read(0x0E + debugger_offset), cpu_ram_read(0x0F + debugger_offset));
-	_printstrNC(11, print);
+	if (debugger_ram_to_show == 0x01) {
+		__os_snprintf(print, 128, "Now showing: CPU RAM at offset %X. System is up to frame %d", debugger_offset, debugger_frame);
+		_printstrNC(9, print);
+		__os_snprintf(print, 128, "%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X", cpu_ram_read(0x00 + debugger_offset), cpu_ram_read(0x01 + debugger_offset), cpu_ram_read(0x02 + debugger_offset), cpu_ram_read(0x03 + debugger_offset), cpu_ram_read(0x04 + debugger_offset), cpu_ram_read(0x05 + debugger_offset), cpu_ram_read(0x06 + debugger_offset), cpu_ram_read(0x07 + debugger_offset), cpu_ram_read(0x08 + debugger_offset), cpu_ram_read(0x09 + debugger_offset), cpu_ram_read(0x0A + debugger_offset), cpu_ram_read(0x0B + debugger_offset), cpu_ram_read(0x0C + debugger_offset), cpu_ram_read(0x0D + debugger_offset), cpu_ram_read(0x0E + debugger_offset), cpu_ram_read(0x0F + debugger_offset));
+		_printstrNC(11, print);
+	} else if (debugger_ram_to_show == 0x02) {
+		__os_snprintf(print, 128, "Now showing: PPU RAM at offset %X. System is up to frame %d", debugger_offset, debugger_frame);
+		_printstrNC(9, print);
+		__os_snprintf(print, 128, "%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X", ppu_ram_read(0x00 + debugger_offset), ppu_ram_read(0x01 + debugger_offset), ppu_ram_read(0x02 + debugger_offset), ppu_ram_read(0x03 + debugger_offset), ppu_ram_read(0x04 + debugger_offset), ppu_ram_read(0x05 + debugger_offset), ppu_ram_read(0x06 + debugger_offset), ppu_ram_read(0x07 + debugger_offset), ppu_ram_read(0x08 + debugger_offset), ppu_ram_read(0x09 + debugger_offset), ppu_ram_read(0x0A + debugger_offset), ppu_ram_read(0x0B + debugger_offset), ppu_ram_read(0x0C + debugger_offset), ppu_ram_read(0x0D + debugger_offset), ppu_ram_read(0x0E + debugger_offset), ppu_ram_read(0x0F + debugger_offset));
+		_printstrNC(11, print);
+	} else {
+		__os_snprintf(print, 128, "Bad RAM setting. Setting to CPU; please update frame!", debugger_ram_to_show);
+		_printstrNC(9, print);
+		debugger_ram_to_show = 0x01;
+	}
 }
 
+unsigned int ram_min_addr = 0x10;
+unsigned int ram_max_addr = 0x7FF0;
 void startDebugger() {
 	debugger_draw();
 	while (1) {
@@ -1713,16 +1735,34 @@ void startDebugger() {
 		} else if (vpad.btn_hold & BUTTON_ZL) {
 			break;
 		} else if (vpad.btn_trigger & BUTTON_L) {
-			if (debugger_offset >= 0x10) {
+			if (debugger_offset >= ram_min_addr) {
 				debugger_offset = debugger_offset - 0x10;
-				fillScreenQuick(0, 0, 0, 0);
+				clearBothBuffers();
 				debugger_draw();
 				flipBuffersQuick();
 			}
 		} else if (vpad.btn_trigger & BUTTON_R) {
-			if (debugger_offset <= 0x7FF0) {
+			if (debugger_offset <= ram_max_addr) {
 				debugger_offset = debugger_offset + 0x10;
-				fillScreenQuick(0, 0, 0, 0);
+				clearBothBuffers();
+				debugger_draw();
+				flipBuffersQuick();
+			}
+		} else if (vpad.btn_trigger & BUTTON_X) {
+			if (debugger_ram_to_show == 0x01) {
+				debugger_offset = 0x00; //Reset the offset (just in case)
+				ram_max_addr = 0x3FF0;
+				ram_min_addr = 0x10;
+				debugger_ram_to_show = 0x02;
+				clearBothBuffers();
+				debugger_draw();
+				flipBuffersQuick();
+			} else if (debugger_ram_to_show == 0x02) {
+				debugger_offset = 0x00; //Reset the offset (just in case)
+				ram_max_addr = 0x7FF0;
+				ram_min_addr = 0x10;
+				debugger_ram_to_show = 0x01;
+				clearBothBuffers();
 				debugger_draw();
 				flipBuffersQuick();
 			}
