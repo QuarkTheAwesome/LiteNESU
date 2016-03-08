@@ -3,8 +3,6 @@
 
 void _main();
 void _osscreeninit();
-void _printstr(char *str);
-void _osscreenexit();
 static int curl_write_data_callback(void *buffer, int size, int nmemb, void *userp);
 void _mainThread(int argc, void *argv);
 
