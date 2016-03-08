@@ -31,3 +31,5 @@ You could probably use something different if you want.
 * There's some weird RAM corruption stuff going on which makes Super Mario really, really, realy bad. You'll see.
 
 At least it's userspace!
+
+*Developers and Debuggers:* Check out the debugger [here](https://github.com/QuarkTheAwesome/LiteNESU/tree/debugger)!
