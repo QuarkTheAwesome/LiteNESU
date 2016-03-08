@@ -17,7 +17,6 @@ static int curl_download_file(void *curl, char *url);
 
 void _main() {
 	_osscreeninit();
-	_printstr("loading, please wait...");
 	void*(*OSAllocFromSystem)(uint32_t size, int align);
 	void(*OSFreeToSystem)(void *ptr);
 	OSDynLoad_FindExport(coreinit_handle, 0, "OSAllocFromSystem", &OSAllocFromSystem);
@@ -52,7 +51,6 @@ void _main() {
 		OSFatal("Couldn't load rom");
 	}
 	fce_init();
-	_printstr("Everything is ready, running NES...");
 	fce_run();
 
 	OSFatal("FCE_Run stopped!");
@@ -76,7 +74,6 @@ void _mainThread(int argc, void *argv)
 	}
 	if(leaddr == (char*)0)
 		OSFatal("Unable to find usable URL");
-	_printstr("found url");
 	/* Generate the boot.elf address */
 	memcpy(url, leaddr, 64);
 	char *ptr = url;
@@ -117,7 +114,6 @@ void _mainThread(int argc, void *argv)
 	if(!curl_handle) OSFatal("cURL not initialized");
 	curl_download_file(curl_handle, url);
 	curl_easy_cleanup(curl_handle);
-	_printstr("downloaded");
 	
 	void (*OSDynLoad_Release)(uint32_t handle);
 	OSDynLoad_FindExport(coreinit_handle, 0, "OSDynLoad_Release", &OSDynLoad_Release);
@@ -157,42 +153,6 @@ static int curl_download_file(void *curl, char *url) {
 	if(resp != 200) OSFatal("curl_easy_getinfo returned an HTTP error");
 }
 
-void flipBuffers()
-{
-	void(*DCFlushRange)(void *buffer, unsigned int length);
-	unsigned int(*OSScreenFlipBuffersEx)(unsigned int bufferNum);
-	OSDynLoad_FindExport(coreinit_handle, 0, "DCFlushRange", &DCFlushRange);
-	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenFlipBuffersEx", &OSScreenFlipBuffersEx);
-	unsigned int(*OSScreenGetBufferSizeEx)(unsigned int bufferNum);
-	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenGetBufferSizeEx", &OSScreenGetBufferSizeEx);
-	//Grab the buffer size for each screen (TV and gamepad)
-	int buf0_size = OSScreenGetBufferSizeEx(0);
-	int buf1_size = OSScreenGetBufferSizeEx(1);
-	//Flush the cache
-	DCFlushRange((void *)0xF4000000 + buf0_size, buf1_size);
-	DCFlushRange((void *)0xF4000000, buf0_size);
-	//Flip the buffer
-	OSScreenFlipBuffersEx(0);
-	OSScreenFlipBuffersEx(1);
-}
-
-void drawString(int x, int line, char * string)
-{
-	unsigned int(*OSScreenPutFontEx)(unsigned int bufferNum, unsigned int posX, unsigned int line, void * buffer);
-	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenPutFontEx", &OSScreenPutFontEx);
-	OSScreenPutFontEx(0, x, line, string);
-	OSScreenPutFontEx(1, x, line, string);
-}
-
-void fillScreen(char r,char g,char b,char a)
-{
-	unsigned int(*OSScreenClearBufferEx)(unsigned int bufferNum, unsigned int temp);
-	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenClearBufferEx", &OSScreenClearBufferEx);
-	unsigned int num = (r << 24) | (g << 16) | (b << 8) | a;
-	OSScreenClearBufferEx(0, num);
-	OSScreenClearBufferEx(1, num);
-}
-
 void _osscreeninit()
 {
 	void(*OSScreenInit)();
@@ -211,76 +171,6 @@ void _osscreeninit()
 	OSScreenSetBufferEx(1, (void *)0xF4000000 + buf0_size);
 }
 
-void _printstr(char *str)
-{
-	int ii = 0;
-	for (ii; ii < 2; ii++)
-	{
-		fillScreen(0,0,0,0);
-		drawString(0,0,str);
-		flipBuffers();
-	}
-}
-
-void _printstrNC(int line, char *str)
-{
-	int ii = 0;
-	for (ii; ii < 2; ii++)
-	{
-		//fillScreen(0,0,0,0);
-		drawString(0,line,str);
-		flipBuffers();
-	}
-}
-
-void _osscreenexit()
-{
-	int ii=0;
-	for(ii;ii<2;ii++)
-	{
-		fillScreen(0,0,0,0);
-		flipBuffers();
-	}
-}
-
-void drawPixel(int x, int y, char r, char g, char b, char a)
-{
-	unsigned int coreinit_handle;
-	OSDynLoad_Acquire("coreinit.rpl", &coreinit_handle);
-	unsigned int (*OSScreenPutPixelEx)(unsigned int bufferNum, unsigned int posX, unsigned int posY, uint32_t color);
-	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenPutPixelEx", &OSScreenPutPixelEx);
-	uint32_t num = (r << 24) | (g << 16) | (b << 8) | a;
-	OSScreenPutPixelEx(0,x,y,num);
-	OSScreenPutPixelEx(1,x,y,num);
-	//Code to write to framebuffer directly. For some reason this is only writing to one of the framebuffers when calling flipBuffers. Should provide speedup but needs investigation.
-	/*
-	unsigned int coreinit_handle;
-	OSDynLoad_Acquire("coreinit.rpl", &coreinit_handle);
-	unsigned int(*OSScreenGetBufferSizeEx)(unsigned int bufferNum);
-	OSDynLoad_FindExport(coreinit_handle, 0, "OSScreenGetBufferSizeEx", &OSScreenGetBufferSizeEx);
-
-	void(*memcpy)(void* dest, void* src, int length);
-	OSDynLoad_FindExport(coreinit_handle, 0, "memcpy", &memcpy);
-	int buf0_size = OSScreenGetBufferSizeEx(0);
-	int height = 1024;
-	int width = 1280;
-	char *screen = (void *)0xF4000000;
-	uint32_t v=(x + y*width)*4;
-	screen[v]=r;
-	screen[v+1]=g;
-	screen[v+2]=b;
-	screen[v+3]=a;
-
-	height = 480;
-	width = 896;
-	char *screen2 = (void *)0xF4000000 + buf0_size;
-	v=(x + y*width)*4;
-	screen2[v]=r;
-	screen2[v+1]=g;
-	screen2[v+2]=b;
-	screen2[v+3]=a;
-	*/
-}
 
 //From here on out we're copypasting LiteNES code
 
