@@ -1698,7 +1698,7 @@ void debugger_draw() {
 	char print[128];
 	__os_snprintf(print, 255, "Now showing: CPU RAM at offset %X. System is up to frame %d", debugger_offset, debugger_frame);
 	_printstrNC(9, print);
-	__os_snprintf(print, 255, "%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X", cpu_ram_read(0x00 + debugger_offset), cpu_ram_read(0x01 + debugger_offset), cpu_ram_read(0x02 + debugger_offset), cpu_ram_read(0x03 + debugger_offset), cpu_ram_read(0x04 + debugger_offset), cpu_ram_read(0x05 + debugger_offset), cpu_ram_read(0x06 + debugger_offset), cpu_ram_read(0x07 + debugger_offset), cpu_ram_read(0x08 + debugger_offset), cpu_ram_read(0x09 + debugger_offset), cpu_ram_read(0x0A + debugger_offset), cpu_ram_read(0x0B + debugger_offset), cpu_ram_read(0x0C + debugger_offset), cpu_ram_read(0x0D + debugger_offset), cpu_ram_read(0x0E + debugger_offset), cpu_ram_read(0x0F + debugger_offset));
+	__os_snprintf(print, 255, "%X %X %X %X %X %X %X %X %X %X %X %X %X %X %X %X", cpu_ram_read(0x00 + debugger_offset), cpu_ram_read(0x01 + debugger_offset), cpu_ram_read(0x02 + debugger_offset), cpu_ram_read(0x03 + debugger_offset), cpu_ram_read(0x04 + debugger_offset), cpu_ram_read(0x05 + debugger_offset), cpu_ram_read(0x06 + debugger_offset), cpu_ram_read(0x07 + debugger_offset), cpu_ram_read(0x08 + debugger_offset), cpu_ram_read(0x09 + debugger_offset), cpu_ram_read(0x0A + debugger_offset), cpu_ram_read(0x0B + debugger_offset), cpu_ram_read(0x0C + debugger_offset), cpu_ram_read(0x0D + debugger_offset), cpu_ram_read(0x0E + debugger_offset), cpu_ram_read(0x0F + debugger_offset));
 	_printstrNC(11, print);
 }
 
