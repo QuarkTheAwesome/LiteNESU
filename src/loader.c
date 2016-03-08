@@ -1626,7 +1626,6 @@ int nes_key_state(int b)
 		OSDynLoad_Acquire("coreinit.rpl", &coreinit_handle);
 		void (*_Exit)();
 		OSDynLoad_FindExport(coreinit_handle, 0, "_Exit", &_Exit);
-		_osscreenexit();
 		_Exit();
 	}
 	return 0;
