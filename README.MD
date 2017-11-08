@@ -5,6 +5,11 @@ Based off [LiteNES](https://github.com/NJUOS/LiteNES). Lots of code taken from [
 Thanks tons. I know I didn't ask you, but your code is still awesome.
 Everything that isn't mine is distributed under their respective licenses.
 
+### Current Project Status
+(2017-11-09) I'm calling it - this isn't going to be touched again. Archiving to prevent confusion - everything will become read-only and frozen in time. 
+
+I can't believe I used to write code like this. I had no idea! Starting from nowhere, I guess.
+
 ### Usage
 You'll need devKitPPC installed and an environment variable (DEVKITPPC) set to the path to devKitPPC (not the bin folder!).
 Once you have all that, just run make!
